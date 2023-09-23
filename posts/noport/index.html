@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title></title>
+  
+    <link rel="stylesheet" href="/main.min.f7c01d9b21203dae7770f0cd54083b6061570124efb43641de8bdd23e8c4260a.css" integrity="sha256-98AdmyEgPa53cPDNVAg7YGFXASTvtDZB3ovdI&#43;jEJgo=" crossorigin="anonymous">
+  
+</head>
+<body>
+  <div class="header"></div>
+  <div class="content">
+  <article>
+    <div class="date">2023-04-02</div>
+    <h1>Localhost subdomains for development</h1>
+    <div><p>When making things for the web we first run them on our machines at a local port.
+We start a server from the command line and browse to <code>localhost:8080</code> or
+similar. The port number is not important, any high port that is not in use will
+do. But it is one more thing to keep in mind, one more subtle difference between
+development and production. The browser&rsquo;s address suggestion doesn&rsquo;t work the same. Using SSL certificates might not be as straightforward.</p>
+<p>Maybe you&rsquo;ve developed an app that you want to use on this machine without
+deploying it anywhere else. It doesn&rsquo;t have or need authentication since you&rsquo;ll
+be the only user. You could have made a desktop app, or used something like
+electron, but why bother? You know how to make webapps, and the browser you have
+will run your app just fine, no need to install another browser just for this.</p>
+<p>There&rsquo;s a nice solution to this problem. Run an nginx server on port 80 or 443
+and have it proxy traffic to each of your apps by giving each of them a
+subdomain of localhost. Then you can browse to <code>http://projectx.localhost</code>, or
+<code>https://wiki.localhost</code>, etc. instead of using ports. Your servers are still
+listening and accessible at the high numbered ports, but the UX for them is
+now the same as that of any other website.</p>
+<h2 id="noport">noport</h2>
+<p><img src="https://github.com/spelufo/noport/raw/main/resources/public/images/noport_ui.png" alt="noport ui"></p>
+<p>I did this by hand for a while and it works great, but configuring nginx for each
+of the sites get&rsquo;s a bit repetitive. So I built <a href="https://github.com/spelufo/noport">noport</a>, a web UI you can run locally to configure
+nginx to assign localhost subdomains to your servers.</p>
+<p>I only worked on it for a couple of days, so there&rsquo;s much to improve, but it
+already does the minimum I need it to do. The readme has a list of features that
+I&rsquo;d like to implement at some point. It doesn&rsquo;t do SSL yet. Everything is built
+into a single static binary, so it trivial to install by downloading the binary
+to a folder on your <code>PATH</code>.</p>
+</div>
+  </article>
+</div>
+  <div class="footer"></div>
+</body>
+</html>

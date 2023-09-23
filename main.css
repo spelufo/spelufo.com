@@ -1,0 +1,78 @@
+/* Reset some default styles for consistent appearance */
+body, h1, h2, h3, p {
+    margin: 0;
+    padding: 0;
+}
+
+/* Set up fonts */
+body {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+}
+
+h1, h2, h3 {
+    font-family: 'Helvetica Neue', sans-serif;
+}
+
+/* Define color palette */
+:root {
+    --primary-color: #3498db;
+    --secondary-color: #e74c3c;
+    --background-color: #f2f2f2;
+    --text-color: #333;
+}
+
+/* Page layout */
+.main {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: var(--background-color);
+}
+
+/* Heading styles */
+h1 {
+    font-size: 28px;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+}
+
+h2 {
+    font-size: 24px;
+    color: var(--secondary-color);
+    margin-bottom: 15px;
+}
+
+/* Body text styles */
+p {
+    margin-bottom: 15px;
+}
+
+/* Code block styles */
+code {
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    background-color: #f9f9f9;
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Links */
+a {
+    color: var(--primary-color);
+    text-decoration: none;
+    transition: color 0.3s ease-in-out;
+}
+
+a:hover {
+    color: var(--secondary-color);
+}
+
+/* Footer */
+footer {
+    text-align: center;
+    margin-top: 30px;
+    color: var(--text-color);
+}

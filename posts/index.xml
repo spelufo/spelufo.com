@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on </title>
+    <link>/posts/</link>
+    <description>Recent content in Posts on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <lastBuildDate>Sun, 02 Apr 2023 20:43:01 -0300</lastBuildDate><atom:link href="/posts/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>Localhost subdomains for development</title>
+      <link>/posts/noport/</link>
+      <pubDate>Sun, 02 Apr 2023 20:43:01 -0300</pubDate>
+      
+      <guid>/posts/noport/</guid>
+      <description>When making things for the web we first run them on our machines at a local port. We start a server from the command line and browse to localhost:8080 or similar. The port number is not important, any high port that is not in use will do. But it is one more thing to keep in mind, one more subtle difference between development and production. The browser&amp;rsquo;s address suggestion doesn&amp;rsquo;t work the same.</description>
+    </item>
+    
+  </channel>
+</rss>
