@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title></title>
+  
+    <link rel="stylesheet" href="/main.min.f7c01d9b21203dae7770f0cd54083b6061570124efb43641de8bdd23e8c4260a.css" integrity="sha256-98AdmyEgPa53cPDNVAg7YGFXASTvtDZB3ovdI&#43;jEJgo=" crossorigin="anonymous">
+  
+</head>
+<body>
+  <div class="header"></div>
+  <div class="content">
+  <article>
+    <div class="date">2023-09-27</div>
+    <h1>Programming a board game</h1>
+    <div><p>I decided to program the game <a href="https://crabfragmentlabs.com/tablero-di-berona">Tablero di Berona</a>, by James Ernest, as an exercise. He explains how to play in <a href="https://www.youtube.com/watch?v=ZkfhD_9MntY">this video</a>. There&rsquo;s also a <a href="https://crabfragmentlabs.com/s/Tablero14.pdf">pdf with the rules</a> on his site.</p>
+<p><img src="/images/tablero_di_berona.png" alt="Tablero di Berona"></p>
+<p>Object orientation is a natural fit, since we are simulating real objects. So a
+way to approach this is to define classes for <code>Board</code> and <code>Piece</code> and go from
+there. Maybe start bottom-up by implementing drawing and movement of pieces, to
+see results on the screen quickly.</p>
+<p>But going down this path you might find that you&rsquo;ve already taken a wrong turn.
+The rules of the game, which are simple discrete transition rules between
+abstract states, are not described naturally in this program. There are two
+simulations we are trying to implement as one:</p>
+<ol>
+<li>The abstract game rules simulation, a sequence of valid game states that players drive.</li>
+<li>The real world objects motions, positions and dispays, which we want to
+emulate for the sake of selling the illusion, to make the interaction natural.</li>
+</ol>
+<p>Without the second component, the game rules still work. You could have a very
+crappy version of the game played on a terminal that prints the state of the
+board at each step and prompts you choose a next move. Or an AI deciding what to
+play next. Or the game rules running on a server to play with someone else over
+the web.</p>
+<p>I would like to make this separation in the code too. So I set out to write the
+rules of the game first, with the constraint that the UI would be separate. I
+would write it later.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">const</span> black <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">0</span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">const</span> white <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">1</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic">/* ... */</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">function</span> State(first_player) {
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">let</span> turn <span style="color:#000;font-weight:bold">=</span> first_player
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">let</span> reserve <span style="color:#000;font-weight:bold">=</span> [Pile(<span style="color:#099">12</span>, black), Pile(<span style="color:#099">12</span>, white)]
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">let</span> board <span style="color:#000;font-weight:bold">=</span> [
+</span></span><span style="display:flex;"><span>    [], [], [], [], [], [],
+</span></span><span style="display:flex;"><span>    [], [], [], [], [], [],
+</span></span><span style="display:flex;"><span>    [], [], [], [], [], [],
+</span></span><span style="display:flex;"><span>  ]
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">let</span> bumped <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">null</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">let</span> dice <span style="color:#000;font-weight:bold">=</span> [<span style="color:#099">0</span>, <span style="color:#099">0</span>]
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">let</span> hand <span style="color:#000;font-weight:bold">=</span> []
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">return</span> {turn, reserve, board, bumped, dice, hand}
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic">/* ... */</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">function</span> run_game(first_player) {
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">let</span> state <span style="color:#000;font-weight:bold">=</span> State(first_player)
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">while</span> (<span style="color:#000;font-weight:bold">!</span>game_ended(state)) {
+</span></span><span style="display:flex;"><span>    state <span style="color:#000;font-weight:bold">=</span> run_turn(state)
+</span></span><span style="display:flex;"><span>    state.turn <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">1</span> <span style="color:#000;font-weight:bold">-</span> state.turn
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">return</span> score_game(state)
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">function</span> run_turn(state) {
+</span></span><span style="display:flex;"><span>  <span style="color:#998;font-style:italic">// Roll the dice.
+</span></span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"></span>  <span style="color:#000;font-weight:bold">let</span> die_1 <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">Math</span>.ceil(<span style="color:#0086b3">Math</span>.random()<span style="color:#000;font-weight:bold">*</span><span style="color:#099">6</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">let</span> die_2 <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">Math</span>.ceil(<span style="color:#0086b3">Math</span>.random()<span style="color:#000;font-weight:bold">*</span><span style="color:#099">6</span>)
+</span></span><span style="display:flex;"><span>  state.dice <span style="color:#000;font-weight:bold">=</span> [die_1, die_2]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#998;font-style:italic">// What happens next depends on what the player decides to do...
+</span></span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"></span>  <span style="color:#998;font-style:italic">// Now what?
+</span></span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"></span>}
+</span></span></code></pre></div><p>What is needed is an interface to call into whatever code does the choosing of
+the next step, be it a UI, a CLI, or an AI. Once the choice is made we can carry
+on executing the rules of the game sequentially, without loosing track of where
+we where or having to encode control flow as state variables. The problem is
+that user input is asynchronous so we cannot just call a function and expect it
+to return when the user has done something. Fortunately javascript has
+async/await.</p>
+<p>We define our interfase to be the function <code>choose</code>, such that
+<code>await choose(state, context, choices)</code> returns an element of <code>choices</code>. Then
+the game rules code can say things like:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">function</span> run_turn(state) {
+</span></span><span style="display:flex;"><span>  <span style="color:#998;font-style:italic">// Roll the dice.
+</span></span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"></span>  <span style="color:#000;font-weight:bold">let</span> die_1 <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">Math</span>.ceil(<span style="color:#0086b3">Math</span>.random()<span style="color:#000;font-weight:bold">*</span><span style="color:#099">6</span>)
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">let</span> die_2 <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">Math</span>.ceil(<span style="color:#0086b3">Math</span>.random()<span style="color:#000;font-weight:bold">*</span><span style="color:#099">6</span>)
+</span></span><span style="display:flex;"><span>  state.dice <span style="color:#000;font-weight:bold">=</span> [die_1, die_2]
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#998;font-style:italic">/* ... */</span>
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">if</span> (die_1 <span style="color:#000;font-weight:bold">!=</span> die_2) {
+</span></span><span style="display:flex;"><span>    <span style="color:#998;font-style:italic">// If the dice are different, we need the player to choose an order in which
+</span></span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"></span>    <span style="color:#998;font-style:italic">// they&#39;ll use the dice that they&#39;ve rolled.
+</span></span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"></span>    state.dice <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">await</span> choose(state, [<span style="color:#d14">&#39;dice_order&#39;</span>], [[die_1, die_2], [die_2, die_1]])
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#998;font-style:italic">/* ... */</span>
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Now <code>choose</code> may be waiting and interpreting user input events, or getting the
+choices from a frontend over the wire, or being driven by an AI. In fact, the
+first thing I did after writing the logic for the rules, to test drive them was
+run the following snippet, which just chooses what to do next at random.</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">function</span> sleep(s) {
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">new</span> <span style="color:#0086b3">Promise</span>((resolve) =&gt; {
+</span></span><span style="display:flex;"><span>    setTimeout(resolve, s <span style="color:#000;font-weight:bold">*</span> <span style="color:#099">1000</span>)
+</span></span><span style="display:flex;"><span>  })
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic">// A version of choose that makes random choices every second.
+</span></span></span><span style="display:flex;"><span><span style="color:#998;font-style:italic"></span><span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">function</span> choose(state, context, choices) {
+</span></span><span style="display:flex;"><span>  draw(state)
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">await</span> sleep(<span style="color:#099">1</span>)
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">let</span> i <span style="color:#000;font-weight:bold">=</span> <span style="color:#0086b3">Math</span>.floor(<span style="color:#0086b3">Math</span>.random()<span style="color:#000;font-weight:bold">*</span>choices.length)
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">let</span> choice <span style="color:#000;font-weight:bold">=</span> choices[i]
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">return</span> choice
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Next I wanted to actually make the choices manually, but still was begin too lazy
+to implement true interactivity. So how about printing the choices and pressing
+a number keys to pick:</p>
+<div class="highlight"><pre tabindex="0" style="background-color:#fff;-moz-tab-size:4;-o-tab-size:4;tab-size:4;"><code class="language-js" data-lang="js"><span style="display:flex;"><span><span style="color:#000;font-weight:bold">function</span> next_key_press() {
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">return</span> <span style="color:#000;font-weight:bold">new</span> <span style="color:#0086b3">Promise</span>((resolve) =&gt; {
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">let</span> handler <span style="color:#000;font-weight:bold">=</span> (event) =&gt; {
+</span></span><span style="display:flex;"><span>      <span style="color:#0086b3">document</span>.removeEventListener(<span style="color:#d14">&#39;keydown&#39;</span>, handler)
+</span></span><span style="display:flex;"><span>      resolve(event)
+</span></span><span style="display:flex;"><span>    }
+</span></span><span style="display:flex;"><span>    <span style="color:#0086b3">document</span>.addEventListener(<span style="color:#d14">&#39;keydown&#39;</span>, handler)
+</span></span><span style="display:flex;"><span>  })
+</span></span><span style="display:flex;"><span>}
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span><span style="color:#000;font-weight:bold">async</span> <span style="color:#000;font-weight:bold">function</span> choose(state, context, choices) {
+</span></span><span style="display:flex;"><span>  draw(state)
+</span></span><span style="display:flex;"><span>  console.log(<span style="color:#d14">&#34;Context:&#34;</span>, context)
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">for</span> (<span style="color:#000;font-weight:bold">let</span> i <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">0</span>; i <span style="color:#000;font-weight:bold">&lt;</span> choices.length; i<span style="color:#000;font-weight:bold">++</span>) {
+</span></span><span style="display:flex;"><span>    console.log(<span style="color:#d14">&#34;   &#34;</span>, i<span style="color:#000;font-weight:bold">+</span><span style="color:#099">1</span>, <span style="color:#d14">&#34;: &#34;</span>, choices[i])
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">let</span> i <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">NaN</span>
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">while</span> (<span style="color:#0086b3">Number</span>.<span style="color:#0086b3">isNaN</span>(i)) {
+</span></span><span style="display:flex;"><span>    <span style="color:#000;font-weight:bold">let</span> ev <span style="color:#000;font-weight:bold">=</span> <span style="color:#000;font-weight:bold">await</span> next_key_press()
+</span></span><span style="display:flex;"><span>    i <span style="color:#000;font-weight:bold">=</span> <span style="color:#099">1</span><span style="color:#000;font-weight:bold">*</span>ev.key <span style="color:#000;font-weight:bold">-</span> <span style="color:#099">1</span>
+</span></span><span style="display:flex;"><span>  }
+</span></span><span style="display:flex;"><span>  <span style="color:#000;font-weight:bold">return</span> choices[i]
+</span></span><span style="display:flex;"><span>}
+</span></span></code></pre></div><p>Hooking up async/await code to event callbacks is a bit clumsy but can be done
+once with a little bit of hidden state and the rest of the program doesn&rsquo;t have
+to deal with it. In the interactive version, that uses with <code>p5.js</code> I ended up
+using a version of <code>choose</code> which waits for a function <code>make_choice</code> to be
+called by some other part of the code.</p>
+<p>Other languages have nicer ways to write concurrent programs. This program would
+have been much easier to write in clojurescript. The same divide could be done
+with go&rsquo;s or julia&rsquo;s coroutines or erlang/elixir processes. Async/await is not
+the point of this post. The point is that writing the game logic is made much
+nicer by implementing it as a separate process, conceptually.</p>
+<h2 id="related-resources">Related resources</h2>
+<p>The same point about how concurrency can make programs simpler is made in Rich Hickey&rsquo;s <a href="https://www.youtube.com/watch?v=yJxFPoxqzWE">illuminating core.async talk</a>.</p>
+<p>This is the same problem discussed by Jonathan Blow in this <a href="https://www.youtube.com/watch?v=_tMb7OS2TOU">very long and rambling but rich conversation</a>.
+He tackles a harder problem where the game rule updates are not done decisively
+one after the other but instead there&rsquo;s a rolling time window where transactions
+of updates are reconciled in custom ways that preserve the game rules while
+allowing tuning for the sake of game feel. That&rsquo;s what I got from watching parts
+of the video anyway.</p>
+</div>
+  </article>
+</div>
+  <div class="footer"></div>
+</body>
+</html>
